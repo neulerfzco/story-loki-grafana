@@ -1,0 +1,24 @@
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 30s
+  external_labels:
+    monitor: 'story-monitor'
+
+rule_files:
+  - '/etc/prometheus/alert_rules.yml'
+  - "recording_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - alertmanager:9093
+
+scrape_configs:
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['<story-node-ip>:9100']
+
+  - job_name: 'story-appd'
+    static_configs:
+      - targets: ['<story-node-ip>:26660']

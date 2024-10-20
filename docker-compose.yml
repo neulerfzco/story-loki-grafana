@@ -1,0 +1,58 @@
+version: "3.5"
+
+services:
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - graf_data:/var/lib/grafana
+      - ./dashboards:/etc/grafana/provisioning/dashboards
+      - ./datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=password # Change this
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - "9390:9090"
+    volumes:
+      - ./etc-prometheus:/etc/prometheus
+      - prom_data:/prometheus
+
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./etc-loki:/etc/loki
+      - lo_data:/loki
+    command: -config.file=/etc/loki/loki-config.yml
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    restart: always
+    ports: 
+    - "9080:9080"
+    volumes:
+      - ./etc-promtail/promtail-config.yaml:/etc/promtail/config.yml
+      - /var/log/journal:/var/log/journal
+
+
+volumes:
+  prom_data: 
+  graf_data: 
+  lo_data: 
+
+networks:
+  monitoring:
+    driver: bridge
+
